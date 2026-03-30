@@ -3,173 +3,173 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Relógio Moderno Dark</title>
+  <title>Relógio Ultra-Fluido Pro</title>
   <style>
     @import url("https://googleapis.com");
 
+    :root {
+      --bg-color: #050505;
+      --accent-color: #29ff08;
+      --text-main: #ffffff;
+      --text-dim: rgba(255, 255, 255, 0.5);
+      --clock-size: 360px;
+    }
+
     body {
       margin: 0;
-      padding: 0;
       display: grid;
       place-items: center;
       height: 100vh;
-      width: 100vw;
+      background: var(--bg-color);
+      color: var(--text-main);
+      font-family: "Comfortaa", sans-serif;
       overflow: hidden;
-      background: black;
-      color: white;
     }
 
     .clock {
-      --clock-size: 360px;
       width: var(--clock-size);
       height: var(--clock-size);
-      font-family: "Comfortaa", sans-serif;
-      margin: auto;
-      border-radius: 50%;
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
+    /* Container de rotação genérico */
+    .rotor {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      transition: transform 0.1s linear; /* Suaviza pequenos ajustes */
+      will-change: transform;
+    }
+
+    .seconds { --dial-size: calc((var(--clock-size) / 2) - 8px); z-index: 1; }
+    .minutes { --dial-size: calc((var(--clock-size) / 2) - 65px); z-index: 2; }
+
     .spike {
-      z-index: 5;
       position: absolute;
       width: 8px;
       height: 1px;
-      background: #fff9;
-      line-height: 20px;
-      transform-origin: 50%;
+      background: var(--text-dim);
       inset: 0;
       margin: auto;
-      font-style: normal;
       transform: rotate(var(--rotate)) translateX(var(--dail-size));
     }
 
-    .spike:nth-child(5n + 1) {
-      box-shadow: -7px 0 #fff9;
+    /* Marcas de 5 em 5 minutos */
+    .spike[data-i$="0"], .spike[data-i$="5"] {
+      background: var(--text-main);
+      width: 12px;
     }
 
-    .spike:nth-child(5n + 1):after {
+    .spike::after {
       content: attr(data-i);
       position: absolute;
       right: 22px;
       top: -10px;
-      transition: 0.5s linear;
-      /* Ajuste para manter os números sempre na vertical */
-      transform: rotate(calc(var(--dRotate) - var(--rotate)));
+      font-size: 14px;
+      /* O JS vai atualizar o --inverse-rotate para manter o texto reto */
+      transform: rotate(var(--inverse-rotate)); 
     }
 
-    .seconds {
-      --dRotate: 0deg;
-      --dail-size: calc((var(--clock-size) / 2) - 8px);
-      font-weight: 800;
-      font-size: 16px;
-      transform: rotate(calc(-1 * var(--dRotate)));
-      position: absolute;
-      inset: 0;
-      margin: auto;
-      transition: all 0.2s ease-out;
-    }
-
-    .minutes {
-      --dRotate: 0deg;
-      --dail-size: calc((var(--clock-size) / 2) - 65px);
-      position: absolute;
-      inset: 0;
-      font-size: 16px;
-      transform: rotate(calc(-1 * var(--dRotate)));
-      margin: auto;
-      transition: all 0.5s ease-out;
-    }
-
-    .hour {
-      font-size: 70px;
+    .hour-center {
+      font-size: 80px;
       font-weight: 900;
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
+      line-height: 1;
+      letter-spacing: -4px;
     }
 
-    .minute {
+    .minute-focus {
+      position: absolute;
+      right: 20%;
+      font-size: 38px;
+      font-weight: 900;
+      background: var(--bg-color);
+      padding: 0 10px;
       z-index: 10;
-      font-size: 36px;
-      font-weight: 900;
-      position: absolute;
-      background: black;
-      right: calc(var(--clock-size) / 4.5);
-      top: 50%;
-      transform: translateY(-50%);
-      padding: 0 5px;
     }
 
-    .minute:after {
+    /* Moldura de seleção (Pointer) */
+    .minute-focus::before {
       content: "";
       position: absolute;
-      border: 2px solid #29ff08;
+      border: 3px solid var(--accent-color);
       border-right: none;
-      height: 50px;
-      left: -10px;
+      height: 55px;
+      width: 130px;
+      right: 0;
       top: 50%;
-      border-radius: 40px 0 0 40px;
-      width: calc(var(--clock-size) / 2.75);
       transform: translateY(-50%);
+      border-radius: 40px 0 0 40px;
       pointer-events: none;
+      box-shadow: -4px 0 15px rgba(41, 255, 8, 0.2);
     }
   </style>
 </head>
 <body>
 
-  <main class="clock">
-    <div class="seconds"></div>
-    <div class="minutes"></div>
-    <div class="minute">00</div>
-    <div class="hour">00</div>
+  <main class="clock" aria-label="Relógio Digital Analógico">
+    <div class="rotor seconds"></div>
+    <div class="rotor minutes"></div>
+    <div class="minute-focus">00</div>
+    <div class="hour-center">00</div>
   </main>
 
   <script>
-    const secondsContainer = document.querySelector('.seconds');
-    const minutesContainer = document.querySelector('.minutes');
-    const minuteDisplay = document.querySelector('.minute');
-    const hourDisplay = document.querySelector('.hour');
+    const secRotor = document.querySelector('.seconds');
+    const minRotor = document.querySelector('.minutes');
+    const hourDisp = document.querySelector('.hour-center');
+    const minDisp = document.querySelector('.minute-focus');
 
-    // Gerar os marcadores (spikes) de 0 a 59
-    for (let s = 0; s < 60; s++) {
-      const displayNum = s.toString().padStart(2, '0');
-      
-      const sSpikeEl = document.createElement('i');
-      sSpikeEl.className = 'spike';
-      sSpikeEl.style.setProperty('--rotate', `${6 * s}deg`);
-      sSpikeEl.setAttribute('data-i', displayNum);
-      secondsContainer.append(sSpikeEl);
-
-      const mSpikeEl = document.createElement('i');
-      mSpikeEl.className = 'spike';
-      mSpikeEl.style.setProperty('--rotate', `${6 * s}deg`);
-      mSpikeEl.setAttribute('data-i', displayNum);
-      minutesContainer.append(mSpikeEl);
+    // Inicialização do DOM otimizada (Fragment)
+    function createSpikes(container) {
+      const fragment = document.createDocumentFragment();
+      for (let i = 0; i < 60; i++) {
+        const spike = document.createElement('i');
+        spike.className = 'spike';
+        spike.style.setProperty('--rotate', `${i * 6}deg`);
+        if (i % 5 === 0) spike.setAttribute('data-i', i.toString().padStart(2, '0'));
+        fragment.appendChild(spike);
+      }
+      container.appendChild(fragment);
     }
 
-    function updateClock() {
+    createSpikes(secRotor);
+    createSpikes(minRotor);
+
+    function update() {
       const now = new Date();
+      const ms = now.getMilliseconds();
       const s = now.getSeconds();
       const m = now.getMinutes();
       const h = now.getHours();
 
-      // Cálculo de rotação: 6 graus por unidade (360/60)
-      const sAngle = s * 6;
-      const mAngle = m * 6;
+      // Rotação contínua (estilo relógio automático)
+      // Graus = (unidade atual * 6) + (fração da unidade seguinte para suavizar)
+      const sDeg = (s * 6) + (ms * 0.006);
+      const mDeg = (m * 6) + (s * 0.1); 
 
-      // Atualiza textos
-      hourDisplay.textContent = h.toString().padStart(2, '0');
-      minuteDisplay.textContent = m.toString().padStart(2, '0');
+      // Aplicamos a rotação negativa no rotor (para os números virem até o marcador)
+      secRotor.style.transform = `rotate(-${sDeg}deg)`;
+      minRotor.style.transform = `rotate(-${mDeg}deg)`;
 
-      // Aplica as rotações nos containers
-      secondsContainer.style.setProperty('--dRotate', `${sAngle}deg`);
-      minutesContainer.style.setProperty('--dRotate', `${mAngle}deg`);
+      // Atualiza rotação inversa dos números para ficarem sempre em pé
+      document.querySelectorAll('.spike').forEach(spike => {
+          const parentRotation = spike.parentElement.classList.contains('seconds') ? sDeg : mDeg;
+          const ownRotation = parseFloat(spike.style.getPropertyValue('--rotate'));
+          spike.style.setProperty('--inverse-rotate', `${parentRotation - ownRotation}deg`);
+      });
+
+      // Textos fixos
+      hourDisp.textContent = h.toString().padStart(2, '0');
+      minDisp.textContent = m.toString().padStart(2, '0');
+
+      requestAnimationFrame(update);
     }
 
-    // Executa a cada segundo
-    setInterval(updateClock, 1000);
-    updateClock(); // Chamada inicial imediata
+    // Inicia o loop de alta performance
+    requestAnimationFrame(update);
   </script>
 </body>
 </html>
