@@ -2,16 +2,21 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Relógio Moderno Original - Corrigido</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relógio Moderno + Clima</title>
   <style>
     @import url("https://googleapis.com");
 
     body {
-      margin: 0; padding: 0;
-      display: grid; place-items: center;
-      height: 100vh; width: 100vw;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      height: 100vh;
+      width: 100vw;
       overflow: hidden;
-      background: black; color: white;
+      background: black;
+      color: white;
       font-family: "Comfortaa", sans-serif;
     }
 
@@ -52,23 +57,23 @@
     /* Traço mais forte a cada 5 unidades */
     .spike:nth-child(5n + 1) { box-shadow: -7px 0 #fff9; }
 
-    /* Estilo dos números (data-i) */
+    /* Números (data-i) com correção de rotação para ficarem em pé */
     .spike:nth-child(5n + 1):after {
       content: attr(data-i);
       position: absolute;
       right: 22px; top: -10px;
-      /* O segredo para o número não girar junto com o círculo */
       transform: rotate(calc(var(--current-rotate) - var(--rotate)));
+      transition: transform 0.2s;
     }
 
     .hour {
-      font-size: 70px; font-weight: 900;
+      font-size: 80px; font-weight: 900;
       position: absolute;
       left: 50%; top: 50%;
       transform: translate(-50%, -50%);
     }
 
-    .minute {
+    .minute-focus {
       z-index: 10;
       font-size: 36px; font-weight: 900;
       position: absolute;
@@ -79,7 +84,7 @@
       padding: 0 5px;
     }
 
-    .minute:after {
+    .minute-focus:after {
       content: "";
       position: absolute;
       border: 2px solid #29ff08;
@@ -89,6 +94,30 @@
       border-radius: 40px 0 0 40px;
       transform: translateY(-50%);
     }
+
+    /* Estilo do Clima */
+    .weather {
+      position: absolute;
+      bottom: -80px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      width: 250px;
+    }
+
+    #temp {
+      display: block;
+      font-size: 24px;
+      font-weight: 700;
+      color: #29ff08;
+    }
+
+    #desc {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.6;
+    }
   </style>
 </head>
 <body>
@@ -96,39 +125,47 @@
   <main class="clock">
     <div class="seconds"></div>
     <div class="minutes"></div>
-    <div class="minute">00</div>
+    <div class="minute-focus">00</div>
     <div class="hour">00</div>
+
+    <div class="weather">
+      <span id="temp">--°C</span>
+      <span id="desc">buscando clima...</span>
+    </div>
   </main>
 
   <script>
     const secondsEl = document.querySelector('.seconds');
     const minutesEl = document.querySelector('.minutes');
-    const minuteText = document.querySelector('.minute');
+    const minuteText = document.querySelector('.minute-focus');
     const hourText = document.querySelector('.hour');
 
-    // Criar os 60 spikes (Exatamente como no seu código original)
-    function init() {
-      for (let s = 0; s < 60; s++) {
-        const sSpike = document.createElement('i');
-        const mSpike = document.createElement('i');
-        sSpike.className = mSpike.className = 'spike';
-        
-        // Define a posição circular
-        const deg = s * 6;
-        sSpike.style.setProperty('--rotate', `${deg}deg`);
-        mSpike.style.setProperty('--rotate', `${deg}deg`);
-        
-        // Adiciona o número (00, 01...)
-        const val = s.toString().padStart(2, '0');
-        sSpike.setAttribute('data-i', val);
-        mSpike.setAttribute('data-i', val);
+    // CONFIGURAÇÃO DO CLIMA
+    const API_KEY = "SUA_API_KEY_AQUI"; // Substitua pela sua chave do OpenWeatherMap
+    const CITY = "Sao Paulo"; // Altere para sua cidade
 
+    // Inicializar os marcadores (Spikes)
+    function initClock() {
+      for (let s = 0; s < 60; s++) {
+        const val = s.toString().padStart(2, '0');
+        const deg = s * 6;
+
+        const sSpike = document.createElement('i');
+        sSpike.className = 'spike';
+        sSpike.style.setProperty('--rotate', `${deg}deg`);
+        sSpike.setAttribute('data-i', val);
         secondsEl.append(sSpike);
+
+        const mSpike = document.createElement('i');
+        mSpike.className = 'spike';
+        mSpike.style.setProperty('--rotate', `${deg}deg`);
+        mSpike.setAttribute('data-i', val);
         minutesEl.append(mSpike);
       }
     }
 
-    function update() {
+    // Atualizar Tempo
+    function updateTime() {
       const now = new Date();
       const s = now.getSeconds();
       const m = now.getMinutes();
@@ -137,22 +174,41 @@
       const sDeg = s * 6;
       const mDeg = m * 6;
 
-      // Gira o anel inteiro (negativo para os números virem até o marcador)
+      // Gira os anéis
       secondsEl.style.transform = `rotate(-${sDeg}deg)`;
       minutesEl.style.transform = `rotate(-${mDeg}deg)`;
 
-      // Passa a rotação atual para o CSS corrigir a posição dos números individuais
+      // Envia a rotação atual para o CSS corrigir os números individuais
       secondsEl.style.setProperty('--current-rotate', `${sDeg}deg`);
       minutesEl.style.setProperty('--current-rotate', `${mDeg}deg`);
 
-      // Atualiza o centro
+      // Atualiza o visor central
       hourText.textContent = h.toString().padStart(2, '0');
       minuteText.textContent = m.toString().padStart(2, '0');
     }
 
-    init();
-    setInterval(update, 1000);
-    update();
+    // Buscar Clima
+    async function updateWeather() {
+      if (API_KEY === "SUA_API_KEY_AQUI") {
+        document.getElementById('desc').textContent = "Configure a API Key";
+        return;
+      }
+      try {
+        const res = await fetch(`https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`);
+        const data = await res.json();
+        document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
+        document.getElementById('desc').textContent = data.weather[0].description;
+      } catch (err) {
+        document.getElementById('desc').textContent = "Erro de conexão";
+      }
+    }
+
+    // Start
+    initClock();
+    setInterval(updateTime, 1000);
+    setInterval(updateWeather, 900000); // 15 minutos
+    updateTime();
+    updateWeather();
   </script>
 </body>
 </html>
