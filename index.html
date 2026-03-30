@@ -2,97 +2,75 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Relógio Moderno Dark</title>
+  <title>Relógio Moderno Original - Corrigido</title>
   <style>
     @import url("https://googleapis.com");
 
     body {
-      margin: 0;
-      padding: 0;
-      display: grid;
-      place-items: center;
-      height: 100vh;
-      width: 100vw;
+      margin: 0; padding: 0;
+      display: grid; place-items: center;
+      height: 100vh; width: 100vw;
       overflow: hidden;
-      background: black;
-      color: white;
+      background: black; color: white;
+      font-family: "Comfortaa", sans-serif;
     }
 
     .clock {
       --clock-size: 360px;
       width: var(--clock-size);
       height: var(--clock-size);
-      font-family: "Comfortaa", sans-serif;
-      margin: auto;
-      border-radius: 50%;
       position: relative;
+    }
+
+    .seconds, .minutes {
+      position: absolute;
+      inset: 0;
+      transition: transform 0.2s ease-out;
+      will-change: transform;
+    }
+
+    .seconds { 
+      --dail-size: calc((var(--clock-size) / 2) - 8px); 
+      font-weight: 800; font-size: 16px;
+    }
+
+    .minutes { 
+      --dail-size: calc((var(--clock-size) / 2) - 65px); 
+      font-size: 16px;
     }
 
     .spike {
       z-index: 5;
       position: absolute;
-      width: 8px;
-      height: 1px;
+      width: 8px; height: 1px;
       background: #fff9;
-      line-height: 20px;
       transform-origin: 50%;
-      inset: 0;
-      margin: auto;
-      font-style: normal;
+      inset: 0; margin: auto;
       transform: rotate(var(--rotate)) translateX(var(--dail-size));
     }
 
-    .spike:nth-child(5n + 1) {
-      box-shadow: -7px 0 #fff9;
-    }
+    /* Traço mais forte a cada 5 unidades */
+    .spike:nth-child(5n + 1) { box-shadow: -7px 0 #fff9; }
 
+    /* Estilo dos números (data-i) */
     .spike:nth-child(5n + 1):after {
       content: attr(data-i);
       position: absolute;
-      right: 22px;
-      top: -10px;
-      transition: 0.5s linear;
-      /* Ajuste para manter os números sempre na vertical */
-      transform: rotate(calc(var(--dRotate) - var(--rotate)));
-    }
-
-    .seconds {
-      --dRotate: 0deg;
-      --dail-size: calc((var(--clock-size) / 2) - 8px);
-      font-weight: 800;
-      font-size: 16px;
-      transform: rotate(calc(-1 * var(--dRotate)));
-      position: absolute;
-      inset: 0;
-      margin: auto;
-      transition: all 0.2s ease-out;
-    }
-
-    .minutes {
-      --dRotate: 0deg;
-      --dail-size: calc((var(--clock-size) / 2) - 65px);
-      position: absolute;
-      inset: 0;
-      font-size: 16px;
-      transform: rotate(calc(-1 * var(--dRotate)));
-      margin: auto;
-      transition: all 0.5s ease-out;
+      right: 22px; top: -10px;
+      /* O segredo para o número não girar junto com o círculo */
+      transform: rotate(calc(var(--current-rotate) - var(--rotate)));
     }
 
     .hour {
-      font-size: 70px;
-      font-weight: 900;
+      font-size: 70px; font-weight: 900;
       position: absolute;
-      left: 50%;
-      top: 50%;
+      left: 50%; top: 50%;
       transform: translate(-50%, -50%);
     }
 
     .minute {
       z-index: 10;
-      font-size: 36px;
-      font-weight: 900;
+      font-size: 36px; font-weight: 900;
       position: absolute;
       background: black;
       right: calc(var(--clock-size) / 4.5);
@@ -106,13 +84,10 @@
       position: absolute;
       border: 2px solid #29ff08;
       border-right: none;
-      height: 50px;
-      left: -10px;
-      top: 50%;
+      height: 50px; width: calc(var(--clock-size) / 2.75);
+      left: -10px; top: 50%;
       border-radius: 40px 0 0 40px;
-      width: calc(var(--clock-size) / 2.75);
       transform: translateY(-50%);
-      pointer-events: none;
     }
   </style>
 </head>
@@ -126,50 +101,58 @@
   </main>
 
   <script>
-    const secondsContainer = document.querySelector('.seconds');
-    const minutesContainer = document.querySelector('.minutes');
-    const minuteDisplay = document.querySelector('.minute');
-    const hourDisplay = document.querySelector('.hour');
+    const secondsEl = document.querySelector('.seconds');
+    const minutesEl = document.querySelector('.minutes');
+    const minuteText = document.querySelector('.minute');
+    const hourText = document.querySelector('.hour');
 
-    // Gerar os marcadores (spikes) de 0 a 59
-    for (let s = 0; s < 60; s++) {
-      const displayNum = s.toString().padStart(2, '0');
-      
-      const sSpikeEl = document.createElement('i');
-      sSpikeEl.className = 'spike';
-      sSpikeEl.style.setProperty('--rotate', `${6 * s}deg`);
-      sSpikeEl.setAttribute('data-i', displayNum);
-      secondsContainer.append(sSpikeEl);
+    // Criar os 60 spikes (Exatamente como no seu código original)
+    function init() {
+      for (let s = 0; s < 60; s++) {
+        const sSpike = document.createElement('i');
+        const mSpike = document.createElement('i');
+        sSpike.className = mSpike.className = 'spike';
+        
+        // Define a posição circular
+        const deg = s * 6;
+        sSpike.style.setProperty('--rotate', `${deg}deg`);
+        mSpike.style.setProperty('--rotate', `${deg}deg`);
+        
+        // Adiciona o número (00, 01...)
+        const val = s.toString().padStart(2, '0');
+        sSpike.setAttribute('data-i', val);
+        mSpike.setAttribute('data-i', val);
 
-      const mSpikeEl = document.createElement('i');
-      mSpikeEl.className = 'spike';
-      mSpikeEl.style.setProperty('--rotate', `${6 * s}deg`);
-      mSpikeEl.setAttribute('data-i', displayNum);
-      minutesContainer.append(mSpikeEl);
+        secondsEl.append(sSpike);
+        minutesEl.append(mSpike);
+      }
     }
 
-    function updateClock() {
+    function update() {
       const now = new Date();
       const s = now.getSeconds();
       const m = now.getMinutes();
       const h = now.getHours();
 
-      // Cálculo de rotação: 6 graus por unidade (360/60)
-      const sAngle = s * 6;
-      const mAngle = m * 6;
+      const sDeg = s * 6;
+      const mDeg = m * 6;
 
-      // Atualiza textos
-      hourDisplay.textContent = h.toString().padStart(2, '0');
-      minuteDisplay.textContent = m.toString().padStart(2, '0');
+      // Gira o anel inteiro (negativo para os números virem até o marcador)
+      secondsEl.style.transform = `rotate(-${sDeg}deg)`;
+      minutesEl.style.transform = `rotate(-${mDeg}deg)`;
 
-      // Aplica as rotações nos containers
-      secondsContainer.style.setProperty('--dRotate', `${sAngle}deg`);
-      minutesContainer.style.setProperty('--dRotate', `${mAngle}deg`);
+      // Passa a rotação atual para o CSS corrigir a posição dos números individuais
+      secondsEl.style.setProperty('--current-rotate', `${sDeg}deg`);
+      minutesEl.style.setProperty('--current-rotate', `${mDeg}deg`);
+
+      // Atualiza o centro
+      hourText.textContent = h.toString().padStart(2, '0');
+      minuteText.textContent = m.toString().padStart(2, '0');
     }
 
-    // Executa a cada segundo
-    setInterval(updateClock, 1000);
-    updateClock(); // Chamada inicial imediata
+    init();
+    setInterval(update, 1000);
+    update();
   </script>
 </body>
 </html>
