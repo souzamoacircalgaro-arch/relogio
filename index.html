@@ -3,20 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Relógio Moderno + Clima</title>
+  <title>Relógio Moderno | Florianópolis</title>
   <style>
     @import url("https://googleapis.com");
 
     body {
-      margin: 0;
-      padding: 0;
-      display: grid;
-      place-items: center;
-      height: 100vh;
-      width: 100vw;
+      margin: 0; padding: 0;
+      display: grid; place-items: center;
+      height: 100vh; width: 100vw;
       overflow: hidden;
-      background: black;
-      color: white;
+      background: black; color: white;
       font-family: "Comfortaa", sans-serif;
     }
 
@@ -28,96 +24,60 @@
     }
 
     .seconds, .minutes {
-      position: absolute;
-      inset: 0;
+      position: absolute; inset: 0;
       transition: transform 0.2s ease-out;
       will-change: transform;
     }
 
-    .seconds { 
-      --dail-size: calc((var(--clock-size) / 2) - 8px); 
-      font-weight: 800; font-size: 16px;
-    }
-
-    .minutes { 
-      --dail-size: calc((var(--clock-size) / 2) - 65px); 
-      font-size: 16px;
-    }
+    .seconds { --dail-size: calc((var(--clock-size) / 2) - 8px); font-weight: 800; font-size: 16px; }
+    .minutes { --dail-size: calc((var(--clock-size) / 2) - 65px); font-size: 16px; }
 
     .spike {
-      z-index: 5;
-      position: absolute;
+      z-index: 5; position: absolute;
       width: 8px; height: 1px;
-      background: #fff9;
-      transform-origin: 50%;
+      background: #fff9; transform-origin: 50%;
       inset: 0; margin: auto;
       transform: rotate(var(--rotate)) translateX(var(--dail-size));
     }
 
-    /* Traço mais forte a cada 5 unidades */
     .spike:nth-child(5n + 1) { box-shadow: -7px 0 #fff9; }
 
-    /* Números (data-i) com correção de rotação para ficarem em pé */
     .spike:nth-child(5n + 1):after {
       content: attr(data-i);
-      position: absolute;
-      right: 22px; top: -10px;
+      position: absolute; right: 22px; top: -10px;
       transform: rotate(calc(var(--current-rotate) - var(--rotate)));
-      transition: transform 0.2s;
     }
 
     .hour {
       font-size: 80px; font-weight: 900;
-      position: absolute;
-      left: 50%; top: 50%;
+      position: absolute; left: 50%; top: 50%;
       transform: translate(-50%, -50%);
     }
 
     .minute-focus {
-      z-index: 10;
-      font-size: 36px; font-weight: 900;
-      position: absolute;
-      background: black;
-      right: calc(var(--clock-size) / 4.5);
-      top: 50%;
-      transform: translateY(-50%);
-      padding: 0 5px;
+      z-index: 10; font-size: 36px; font-weight: 900;
+      position: absolute; background: black;
+      right: calc(var(--clock-size) / 4.5); top: 50%;
+      transform: translateY(-50%); padding: 0 5px;
     }
 
     .minute-focus:after {
-      content: "";
-      position: absolute;
-      border: 2px solid #29ff08;
-      border-right: none;
+      content: ""; position: absolute;
+      border: 2px solid #29ff08; border-right: none;
       height: 50px; width: calc(var(--clock-size) / 2.75);
       left: -10px; top: 50%;
       border-radius: 40px 0 0 40px;
       transform: translateY(-50%);
     }
 
-    /* Estilo do Clima */
     .weather {
-      position: absolute;
-      bottom: -80px;
-      left: 50%;
-      transform: translateX(-50%);
-      text-align: center;
-      width: 250px;
+      position: absolute; bottom: -80px;
+      left: 50%; transform: translateX(-50%);
+      text-align: center; width: 300px;
     }
 
-    #temp {
-      display: block;
-      font-size: 24px;
-      font-weight: 700;
-      color: #29ff08;
-    }
-
-    #desc {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      opacity: 0.6;
-    }
+    #temp { display: block; font-size: 26px; font-weight: 700; color: #29ff08; }
+    #desc { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.6; }
   </style>
 </head>
 <body>
@@ -130,7 +90,7 @@
 
     <div class="weather">
       <span id="temp">--°C</span>
-      <span id="desc">buscando clima...</span>
+      <span id="desc">Sincronizando clima...</span>
     </div>
   </main>
 
@@ -140,73 +100,54 @@
     const minuteText = document.querySelector('.minute-focus');
     const hourText = document.querySelector('.hour');
 
-    // CONFIGURAÇÃO DO CLIMA
-    const API_KEY = "SUA_API_KEY_AQUI"; // Substitua pela sua chave do OpenWeatherMap
-    const CITY = "Sao Paulo"; // Altere para sua cidade
+    const API_KEY = "a0d43926399b27cb538f5713317a90a6"; 
+    const CITY = "Florianopolis";
 
-    // Inicializar os marcadores (Spikes)
     function initClock() {
       for (let s = 0; s < 60; s++) {
         const val = s.toString().padStart(2, '0');
         const deg = s * 6;
-
         const sSpike = document.createElement('i');
-        sSpike.className = 'spike';
-        sSpike.style.setProperty('--rotate', `${deg}deg`);
-        sSpike.setAttribute('data-i', val);
-        secondsEl.append(sSpike);
-
         const mSpike = document.createElement('i');
-        mSpike.className = 'spike';
+        sSpike.className = mSpike.className = 'spike';
+        sSpike.style.setProperty('--rotate', `${deg}deg`);
         mSpike.style.setProperty('--rotate', `${deg}deg`);
+        sSpike.setAttribute('data-i', val);
         mSpike.setAttribute('data-i', val);
+        secondsEl.append(sSpike);
         minutesEl.append(mSpike);
       }
     }
 
-    // Atualizar Tempo
     function updateTime() {
       const now = new Date();
-      const s = now.getSeconds();
-      const m = now.getMinutes();
-      const h = now.getHours();
+      const s = now.getSeconds(), m = now.getMinutes(), h = now.getHours();
+      const sDeg = s * 6, mDeg = m * 6;
 
-      const sDeg = s * 6;
-      const mDeg = m * 6;
-
-      // Gira os anéis
       secondsEl.style.transform = `rotate(-${sDeg}deg)`;
       minutesEl.style.transform = `rotate(-${mDeg}deg)`;
-
-      // Envia a rotação atual para o CSS corrigir os números individuais
       secondsEl.style.setProperty('--current-rotate', `${sDeg}deg`);
       minutesEl.style.setProperty('--current-rotate', `${mDeg}deg`);
 
-      // Atualiza o visor central
       hourText.textContent = h.toString().padStart(2, '0');
       minuteText.textContent = m.toString().padStart(2, '0');
     }
 
-    // Buscar Clima
     async function updateWeather() {
-      if (API_KEY === "SUA_API_KEY_AQUI") {
-        document.getElementById('desc').textContent = "Configure a API Key";
-        return;
-      }
       try {
         const res = await fetch(`https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`);
+        if (!res.ok) throw new Error();
         const data = await res.json();
         document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
         document.getElementById('desc').textContent = data.weather[0].description;
       } catch (err) {
-        document.getElementById('desc').textContent = "Erro de conexão";
+        document.getElementById('desc').textContent = "Clima indisponível";
       }
     }
 
-    // Start
     initClock();
     setInterval(updateTime, 1000);
-    setInterval(updateWeather, 900000); // 15 minutos
+    setInterval(updateWeather, 600000); // Atualiza clima a cada 10 min
     updateTime();
     updateWeather();
   </script>
