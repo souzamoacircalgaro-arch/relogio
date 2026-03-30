@@ -1,6 +1,175 @@
-<main class="clock">
-  <div class="seconds"></div>
-  <div class="minutes"></div>
-  <div class="minute"></div>
-  <div class="hour"></div>
-</main>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relógio Moderno Dark</title>
+  <style>
+    @import url("https://googleapis.com");
+
+    body {
+      margin: 0;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      background: black;
+      color: white;
+    }
+
+    .clock {
+      --clock-size: 360px;
+      width: var(--clock-size);
+      height: var(--clock-size);
+      font-family: "Comfortaa", sans-serif;
+      margin: auto;
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .spike {
+      z-index: 5;
+      position: absolute;
+      width: 8px;
+      height: 1px;
+      background: #fff9;
+      line-height: 20px;
+      transform-origin: 50%;
+      inset: 0;
+      margin: auto;
+      font-style: normal;
+      transform: rotate(var(--rotate)) translateX(var(--dail-size));
+    }
+
+    .spike:nth-child(5n + 1) {
+      box-shadow: -7px 0 #fff9;
+    }
+
+    .spike:nth-child(5n + 1):after {
+      content: attr(data-i);
+      position: absolute;
+      right: 22px;
+      top: -10px;
+      transition: 0.5s linear;
+      /* Ajuste para manter os números sempre na vertical */
+      transform: rotate(calc(var(--dRotate) - var(--rotate)));
+    }
+
+    .seconds {
+      --dRotate: 0deg;
+      --dail-size: calc((var(--clock-size) / 2) - 8px);
+      font-weight: 800;
+      font-size: 16px;
+      transform: rotate(calc(-1 * var(--dRotate)));
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      transition: all 0.2s ease-out;
+    }
+
+    .minutes {
+      --dRotate: 0deg;
+      --dail-size: calc((var(--clock-size) / 2) - 65px);
+      position: absolute;
+      inset: 0;
+      font-size: 16px;
+      transform: rotate(calc(-1 * var(--dRotate)));
+      margin: auto;
+      transition: all 0.5s ease-out;
+    }
+
+    .hour {
+      font-size: 70px;
+      font-weight: 900;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .minute {
+      z-index: 10;
+      font-size: 36px;
+      font-weight: 900;
+      position: absolute;
+      background: black;
+      right: calc(var(--clock-size) / 4.5);
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 0 5px;
+    }
+
+    .minute:after {
+      content: "";
+      position: absolute;
+      border: 2px solid #29ff08;
+      border-right: none;
+      height: 50px;
+      left: -10px;
+      top: 50%;
+      border-radius: 40px 0 0 40px;
+      width: calc(var(--clock-size) / 2.75);
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="clock">
+    <div class="seconds"></div>
+    <div class="minutes"></div>
+    <div class="minute">00</div>
+    <div class="hour">00</div>
+  </main>
+
+  <script>
+    const secondsContainer = document.querySelector('.seconds');
+    const minutesContainer = document.querySelector('.minutes');
+    const minuteDisplay = document.querySelector('.minute');
+    const hourDisplay = document.querySelector('.hour');
+
+    // Gerar os marcadores (spikes) de 0 a 59
+    for (let s = 0; s < 60; s++) {
+      const displayNum = s.toString().padStart(2, '0');
+      
+      const sSpikeEl = document.createElement('i');
+      sSpikeEl.className = 'spike';
+      sSpikeEl.style.setProperty('--rotate', `${6 * s}deg`);
+      sSpikeEl.setAttribute('data-i', displayNum);
+      secondsContainer.append(sSpikeEl);
+
+      const mSpikeEl = document.createElement('i');
+      mSpikeEl.className = 'spike';
+      mSpikeEl.style.setProperty('--rotate', `${6 * s}deg`);
+      mSpikeEl.setAttribute('data-i', displayNum);
+      minutesContainer.append(mSpikeEl);
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const s = now.getSeconds();
+      const m = now.getMinutes();
+      const h = now.getHours();
+
+      // Cálculo de rotação: 6 graus por unidade (360/60)
+      const sAngle = s * 6;
+      const mAngle = m * 6;
+
+      // Atualiza textos
+      hourDisplay.textContent = h.toString().padStart(2, '0');
+      minuteDisplay.textContent = m.toString().padStart(2, '0');
+
+      // Aplica as rotações nos containers
+      secondsContainer.style.setProperty('--dRotate', `${sAngle}deg`);
+      minutesContainer.style.setProperty('--dRotate', `${mAngle}deg`);
+    }
+
+    // Executa a cada segundo
+    setInterval(updateClock, 1000);
+    updateClock(); // Chamada inicial imediata
+  </script>
+</body>
+</html>
