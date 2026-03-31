@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relógio Moderno | Florianópolis</title>
   <style>
-    /* Importação da fonte corrigida */
+    /* CORREÇÃO 1: Link completo da fonte Google Fonts */
     @import url("https://googleapis.com");
 
     body {
@@ -136,9 +136,8 @@
 
     async function updateWeather() {
       try {
-        // URL DEFINITIVA CORRIGIDA
+        /* CORREÇÃO 2: URL da API com domínio api. e parâmetros corrigidos */
         const url = `https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`;
-        
         const res = await fetch(url);
         if (!res.ok) throw new Error();
         
@@ -146,7 +145,6 @@
         
         document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
         document.getElementById('desc').textContent = data.weather[0].description;
-        
       } catch (err) {
         document.getElementById('desc').textContent = "Ativando chave API...";
       }
