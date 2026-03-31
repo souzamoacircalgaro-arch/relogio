@@ -2,7 +2,8 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Relógio Premium Original</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relógio Moderno | Florianópolis</title>
   <style>
     @import url("https://googleapis.com");
 
@@ -22,70 +23,60 @@
       position: relative;
     }
 
-    /* Containers de rotação */
     .seconds, .minutes {
       position: absolute; inset: 0;
-      transition: transform 0.3s ease-out;
+      transition: transform 0.2s ease-out;
+      will-change: transform;
     }
 
     .seconds { --dail-size: calc((var(--clock-size) / 2) - 8px); font-weight: 800; font-size: 16px; }
     .minutes { --dail-size: calc((var(--clock-size) / 2) - 65px); font-size: 16px; }
 
     .spike {
-      position: absolute; width: 8px; height: 1px;
-      background: rgba(255,255,255,0.3);
+      z-index: 5; position: absolute;
+      width: 8px; height: 1px;
+      background: #fff9; transform-origin: 50%;
       inset: 0; margin: auto;
       transform: rotate(var(--rotate)) translateX(var(--dail-size));
     }
 
-    /* Traço forte e Números */
-    .spike:nth-child(5n + 1) { background: white; box-shadow: -7px 0 rgba(255,255,255,0.5); }
+    .spike:nth-child(5n + 1) { box-shadow: -7px 0 #fff9; }
+
     .spike:nth-child(5n + 1):after {
       content: attr(data-i);
       position: absolute; right: 22px; top: -10px;
       transform: rotate(calc(var(--current-rotate) - var(--rotate)));
     }
 
-    /* Hora Central */
     .hour {
       font-size: 80px; font-weight: 900;
-      position: absolute;
-      left: 45%; top: 50%; /* Leve ajuste para a esquerda */
+      position: absolute; left: 50%; top: 50%;
       transform: translate(-50%, -50%);
-      z-index: 5;
     }
 
-    /* Minuto em Destaque */
     .minute-focus {
-      z-index: 10;
-      font-size: 38px; font-weight: 900;
-      position: absolute;
-      background: black; /* Isso esconde os números que passam atrás */
-      left: 62%; top: 50%;
-      transform: translate(-50%, -50%);
-      padding: 5px 10px;
+      z-index: 10; font-size: 36px; font-weight: 900;
+      position: absolute; background: black;
+      right: calc(var(--clock-size) / 4.5); top: 50%;
+      transform: translateY(-50%); padding: 0 5px;
     }
 
-    /* Moldura Verde */
     .minute-focus:after {
-      content: "";
-      position: absolute;
-      border: 3px solid #29ff08;
-      border-right: none;
-      height: 55px; width: 140px;
-      right: 0; top: 50%;
+      content: ""; position: absolute;
+      border: 2px solid #29ff08; border-right: none;
+      height: 50px; width: calc(var(--clock-size) / 2.75);
+      left: -10px; top: 50%;
       border-radius: 40px 0 0 40px;
       transform: translateY(-50%);
-      z-index: -1;
     }
 
     .weather {
       position: absolute; bottom: -80px;
       left: 50%; transform: translateX(-50%);
-      text-align: center; width: 100%;
+      text-align: center; width: 300px;
     }
 
-    #temp { display: block; font-size: 26px; font-weight: 900; color: #29ff08; }
+    #temp { display: block; font-size: 26px; font-weight: 700; color: #29ff08; }
     #desc { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.6; }
   </style>
 </head>
@@ -106,13 +97,13 @@
   <script>
     const secondsEl = document.querySelector('.seconds');
     const minutesEl = document.querySelector('.minutes');
-    const minText = document.querySelector('.minute-focus');
+    const minuteText = document.querySelector('.minute-focus');
     const hourText = document.querySelector('.hour');
 
     const API_KEY = "a0d43926399b27cb538f5713317a90a6"; 
     const CITY = "Florianopolis";
 
-    function init() {
+    function initClock() {
       for (let s = 0; s < 60; s++) {
         const val = s.toString().padStart(2, '0');
         const deg = s * 6;
@@ -128,7 +119,7 @@
       }
     }
 
-    function update() {
+    function updateTime() {
       const now = new Date();
       const s = now.getSeconds(), m = now.getMinutes(), h = now.getHours();
       const sDeg = s * 6, mDeg = m * 6;
@@ -139,26 +130,25 @@
       minutesEl.style.setProperty('--current-rotate', `${mDeg}deg`);
 
       hourText.textContent = h.toString().padStart(2, '0');
-      minText.textContent = m.toString().padStart(2, '0');
+      minuteText.textContent = m.toString().padStart(2, '0');
     }
 
     async function updateWeather() {
       try {
         const res = await fetch(`https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`);
+        if (!res.ok) throw new Error();
         const data = await res.json();
-        if(data.main) {
-          document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
-          document.getElementById('desc').textContent = data.weather[0].description;
-        }
+        document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
+        document.getElementById('desc').textContent = data.weather[0].description;
       } catch (err) {
-        document.getElementById('desc').textContent = "Aguardando ativação API...";
+        document.getElementById('desc').textContent = "Clima indisponível";
       }
     }
 
-    init();
-    setInterval(update, 1000);
-    setInterval(updateWeather, 600000);
-    update();
+    initClock();
+    setInterval(updateTime, 1000);
+    setInterval(updateWeather, 600000); // Atualiza clima a cada 10 min
+    updateTime();
     updateWeather();
   </script>
 </body>
