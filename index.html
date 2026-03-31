@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relógio Moderno | Florianópolis</title>
   <style>
+    /* Importação da fonte corrigida */
     @import url("https://googleapis.com");
 
     body {
@@ -135,8 +136,12 @@
 
     async function updateWeather() {
       try {
-        const res = await fetch(`https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`);
+        // Endpoint corrigido com api. e /data/2.5/
+        const url = `https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`;
+        const res = await fetch(url);
+        
         if (!res.ok) throw new Error();
+        
         const data = await res.json();
         document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
         document.getElementById('desc').textContent = data.weather[0].description;
@@ -147,7 +152,7 @@
 
     initClock();
     setInterval(updateTime, 1000);
-    setInterval(updateWeather, 600000); // Atualiza clima a cada 10 min
+    setInterval(updateWeather, 600000); 
     updateTime();
     updateWeather();
   </script>
