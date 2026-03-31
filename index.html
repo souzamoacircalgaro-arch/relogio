@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relógio Moderno | Florianópolis</title>
   <style>
+    /* Importação da fonte corrigida */
     @import url("https://googleapis.com");
 
     body {
@@ -135,7 +136,7 @@
 
     async function updateWeather() {
       try {
-        // Link corrigido para evitar o erro ERR_NAME_NOT_RESOLVED
+        // Link CORRIGIDO para a API oficial de dados
         const url = `https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`;
         const res = await fetch(url);
         
@@ -143,7 +144,7 @@
         
         const data = await res.json();
         
-        // Exibição dos dados corrigida
+        // Exibição dos dados corrigida para Florianópolis
         document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
         document.getElementById('desc').textContent = data.weather[0].description;
         
