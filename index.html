@@ -49,7 +49,7 @@
     }
 
     .hour {
-      font-size: 60px; font-weight: 700;
+      font-size: 80px; font-weight: 900;
       position: absolute; left: 50%; top: 50%;
       transform: translate(-50%, -50%);
     }
@@ -100,6 +100,7 @@
     const minuteText = document.querySelector('.minute-focus');
     const hourText = document.querySelector('.hour');
 
+    // DADOS DA SUA API
     const API_KEY = "b2149d654a7186c9e90a4d102310f688"; 
     const CITY = "Florianopolis";
 
@@ -135,20 +136,21 @@
 
     async function updateWeather() {
       try {
-        // Chamada de API conforme o padrão do OpenWeather
-        const url = `https://openweathermap.org{CITY}&units=metric&lang=pt_br&APPID=${API_KEY}`;
+        // URL CORRIGIDA: api. + /data/2.5/ + ?q=
+        const url = `https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`;
         const res = await fetch(url);
         
         if (!res.ok) throw new Error();
         
         const data = await res.json();
         
+        // Exibição dos dados
         document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
         document.getElementById('desc').textContent = data.weather[0].description;
         
       } catch (err) {
         // Se a chave ainda não estiver ativa, aparecerá esta mensagem
-        document.getElementById('desc').textContent = "Ativando Chave API...";
+        document.getElementById('desc').textContent = "Ativando Chave API (aguarde)...";
       }
     }
 
