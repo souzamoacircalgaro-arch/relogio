@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relógio Moderno | Florianópolis</title>
   <style>
-    /* Importação da fonte corrigida */
     @import url("https://googleapis.com");
 
     body {
@@ -136,16 +135,23 @@
 
     async function updateWeather() {
       try {
-        // Endpoint corrigido com api. e /data/2.5/
         const url = `https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`;
         const res = await fetch(url);
         
-        if (!res.ok) throw new Error();
+        if (!res.ok) {
+            const error = await res.json();
+            console.error("Erro API:", error.message);
+            return;
+        }
         
         const data = await res.json();
+        
+        // CORREÇÃO AQUI: weather[0] é necessário para acessar a descrição
         document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
         document.getElementById('desc').textContent = data.weather[0].description;
+        
       } catch (err) {
+        console.error("Erro Conexão:", err);
         document.getElementById('desc').textContent = "Clima indisponível";
       }
     }
