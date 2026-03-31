@@ -2,7 +2,6 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relógio Moderno | Florianópolis</title>
   <style>
     @import url("https://googleapis.com");
@@ -135,15 +134,15 @@
 
     async function updateWeather() {
       try {
-        // URL CORRIGIDA COM API. E /DATA/2.5/
+        // CORREÇÃO: URL oficial com api. e uso correto de ${VARIÁVEL}
         const url = `https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`;
-        const res = await fetch(url);
         
+        const res = await fetch(url);
         if (!res.ok) throw new Error();
         
         const data = await res.json();
         
-        // CORREÇÃO: weather[0] é o caminho correto para a descrição
+        // CORREÇÃO: Acessando corretamente a descrição do clima
         document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
         document.getElementById('desc').textContent = data.weather[0].description;
         
