@@ -45,7 +45,6 @@
     .spike:nth-child(5n + 1):after {
       content: attr(data-i);
       position: absolute; right: 22px; top: -10px;
-      /* Mantém os números em pé enquanto o círculo gira */
       transform: rotate(calc(var(--current-rotate) - var(--rotate)));
     }
 
@@ -101,7 +100,6 @@
     const minuteText = document.querySelector('.minute-focus');
     const hourText = document.querySelector('.hour');
 
-    // Chave API e Cidade configuradas
     const API_KEY = "0e48c216edda0cd4a3ebdcc196570978"; 
     const CITY = "Florianopolis";
 
@@ -120,3 +118,45 @@
         minutesEl.append(mSpike);
       }
     }
+
+    function updateTime() {
+      const now = new Date();
+      const s = now.getSeconds(), m = now.getMinutes(), h = now.getHours();
+      const sDeg = s * 6, mDeg = m * 6;
+
+      secondsEl.style.transform = `rotate(-${sDeg}deg)`;
+      minutesEl.style.transform = `rotate(-${mDeg}deg)`;
+      secondsEl.style.setProperty('--current-rotate', `${sDeg}deg`);
+      minutesEl.style.setProperty('--current-rotate', `${mDeg}deg`);
+
+      hourText.textContent = h.toString().padStart(2, '0');
+      minuteText.textContent = m.toString().padStart(2, '0');
+    }
+
+    async function updateWeather() {
+      try {
+        // URL CORRIGIDA COM API. E /DATA/2.5/
+        const url = `https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`;
+        const res = await fetch(url);
+        
+        if (!res.ok) throw new Error();
+        
+        const data = await res.json();
+        
+        // CORREÇÃO: weather[0] é o caminho correto para a descrição
+        document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
+        document.getElementById('desc').textContent = data.weather[0].description;
+        
+      } catch (err) {
+        document.getElementById('desc').textContent = "Clima indisponível";
+      }
+    }
+
+    initClock();
+    setInterval(updateTime, 1000);
+    setInterval(updateWeather, 600000); 
+    updateTime();
+    updateWeather();
+  </script>
+</body>
+</html>
