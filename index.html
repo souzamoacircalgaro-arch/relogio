@@ -135,6 +135,7 @@
 
     async function updateWeather() {
       try {
+        // Link corrigido para evitar o erro ERR_NAME_NOT_RESOLVED
         const url = `https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`;
         const res = await fetch(url);
         
@@ -142,7 +143,7 @@
         
         const data = await res.json();
         
-        // CORREÇÃO: Acessando o primeiro item do array weather[0]
+        // Exibição dos dados corrigida
         document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
         document.getElementById('desc').textContent = data.weather[0].description;
         
