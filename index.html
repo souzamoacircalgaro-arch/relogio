@@ -138,20 +138,15 @@
         const url = `https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`;
         const res = await fetch(url);
         
-        if (!res.ok) {
-            const error = await res.json();
-            console.error("Erro API:", error.message);
-            return;
-        }
+        if (!res.ok) throw new Error();
         
         const data = await res.json();
         
-        // CORREÇÃO AQUI: weather[0] é necessário para acessar a descrição
+        // CORREÇÃO: Acessando o primeiro item do array weather[0]
         document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
         document.getElementById('desc').textContent = data.weather[0].description;
         
       } catch (err) {
-        console.error("Erro Conexão:", err);
         document.getElementById('desc').textContent = "Clima indisponível";
       }
     }
@@ -164,3 +159,6 @@
   </script>
 </body>
 </html>
+
+
+
