@@ -2,8 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Relógio Moderno | Florianópolis</title>
+  <title>Relógio Premium V2</title>
   <style>
     @import url("https://googleapis.com");
 
@@ -17,7 +16,7 @@
     }
 
     .clock {
-      --clock-size: 360px;
+      --clock-size: 400px; /* Aumentado para dar mais espaço */
       width: var(--clock-size);
       height: var(--clock-size);
       position: relative;
@@ -25,59 +24,66 @@
 
     .seconds, .minutes {
       position: absolute; inset: 0;
-      transition: transform 0.2s ease-out;
+      transition: transform 0.3s cubic-bezier(0.4, 2.08, 0.55, 0.44);
       will-change: transform;
     }
 
-    .seconds { --dail-size: calc((var(--clock-size) / 2) - 8px); font-weight: 800; font-size: 16px; }
-    .minutes { --dail-size: calc((var(--clock-size) / 2) - 65px); font-size: 16px; }
+    /* Ajuste de distância para evitar sobreposição */
+    .seconds { --dail-size: 185px; font-weight: 700; font-size: 14px; z-index: 1; }
+    .minutes { --dail-size: 130px; font-size: 14px; z-index: 2; }
 
     .spike {
-      z-index: 5; position: absolute;
-      width: 8px; height: 1px;
-      background: #fff9; transform-origin: 50%;
+      position: absolute;
+      width: 10px; height: 1px;
+      background: rgba(255,255,255,0.2);
       inset: 0; margin: auto;
       transform: rotate(var(--rotate)) translateX(var(--dail-size));
     }
 
-    .spike:nth-child(5n + 1) { box-shadow: -7px 0 #fff9; }
-
-    .spike:nth-child(5n + 1):after {
+    .spike[data-i]:after {
       content: attr(data-i);
-      position: absolute; right: 22px; top: -10px;
-      transform: rotate(calc(var(--current-rotate) - var(--rotate)));
+      position: absolute;
+      right: 25px; top: -10px;
+      /* Correção de rotação individual */
+      transform: rotate(calc(var(--current-rotate) * -1 - var(--rotate)));
+      transition: transform 0.3s;
     }
 
     .hour {
-      font-size: 80px; font-weight: 900;
+      font-size: 90px; font-weight: 900;
       position: absolute; left: 50%; top: 50%;
       transform: translate(-50%, -50%);
+      z-index: 5;
     }
 
     .minute-focus {
-      z-index: 10; font-size: 36px; font-weight: 900;
-      position: absolute; background: black;
-      right: calc(var(--clock-size) / 4.5); top: 50%;
-      transform: translateY(-50%); padding: 0 5px;
+      z-index: 20; /* Fica por cima de todos os spikes */
+      font-size: 40px; font-weight: 900;
+      position: absolute;
+      background: black; /* Cobre os números que passarem atrás */
+      right: 18%; top: 50%;
+      transform: translateY(-50%);
+      padding: 5px 10px;
     }
 
     .minute-focus:after {
       content: ""; position: absolute;
-      border: 2px solid #29ff08; border-right: none;
-      height: 50px; width: calc(var(--clock-size) / 2.75);
-      left: -10px; top: 50%;
+      border: 3px solid #29ff08; border-right: none;
+      height: 60px; width: 160px;
+      right: 0; top: 50%;
       border-radius: 40px 0 0 40px;
       transform: translateY(-50%);
+      z-index: -1;
     }
 
     .weather {
-      position: absolute; bottom: -80px;
+      position: absolute; bottom: -100px;
       left: 50%; transform: translateX(-50%);
-      text-align: center; width: 300px;
+      text-align: center; width: 100%;
     }
 
-    #temp { display: block; font-size: 26px; font-weight: 700; color: #29ff08; }
-    #desc { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.6; }
+    #temp { display: block; font-size: 28px; font-weight: 900; color: #29ff08; margin-bottom: 5px; }
+    #desc { font-size: 13px; text-transform: uppercase; letter-spacing: 3px; color: #fff; opacity: 0.7; }
   </style>
 </head>
 <body>
@@ -90,65 +96,80 @@
 
     <div class="weather">
       <span id="temp">--°C</span>
-      <span id="desc">Sincronizando clima...</span>
+      <span id="desc">Sincronizando...</span>
     </div>
   </main>
 
   <script>
     const secondsEl = document.querySelector('.seconds');
     const minutesEl = document.querySelector('.minutes');
-    const minuteText = document.querySelector('.minute-focus');
+    const minText = document.querySelector('.minute-focus');
     const hourText = document.querySelector('.hour');
 
     const API_KEY = "a0d43926399b27cb538f5713317a90a6"; 
     const CITY = "Florianopolis";
 
-    function initClock() {
-      for (let s = 0; s < 60; s++) {
-        const val = s.toString().padStart(2, '0');
-        const deg = s * 6;
+    function init() {
+      for (let i = 0; i < 60; i++) {
+        const val = i.toString().padStart(2, '0');
+        const deg = i * 6;
+        
+        // Criar spikes secundários (só aparecem a cada 5 unidades para limpar o visual)
         const sSpike = document.createElement('i');
         const mSpike = document.createElement('i');
         sSpike.className = mSpike.className = 'spike';
         sSpike.style.setProperty('--rotate', `${deg}deg`);
-        mSpike.style.setProperty('--rotate', `${deg}deg`);
-        sSpike.setAttribute('data-i', val);
-        mSpike.setAttribute('data-i', val);
+        
+        if (i % 5 === 0) {
+            sSpike.setAttribute('data-i', val);
+            mSpike.setAttribute('data-i', val);
+            sSpike.style.background = "rgba(255,255,255,0.6)";
+            mSpike.style.background = "rgba(255,255,255,0.6)";
+        }
+
         secondsEl.append(sSpike);
         minutesEl.append(mSpike);
       }
     }
 
-    function updateTime() {
+    function update() {
       const now = new Date();
       const s = now.getSeconds(), m = now.getMinutes(), h = now.getHours();
-      const sDeg = s * 6, mDeg = m * 6;
+      
+      const sDeg = s * 6;
+      const mDeg = m * 6;
 
-      secondsEl.style.transform = `rotate(-${sDeg}deg)`;
-      minutesEl.style.transform = `rotate(-${mDeg}deg)`;
+      secondsEl.style.transform = `rotate(${sDeg}deg)`;
+      minutesEl.style.transform = `rotate(${mDeg}deg)`;
+      
       secondsEl.style.setProperty('--current-rotate', `${sDeg}deg`);
       minutesEl.style.setProperty('--current-rotate', `${mDeg}deg`);
 
       hourText.textContent = h.toString().padStart(2, '0');
-      minuteText.textContent = m.toString().padStart(2, '0');
+      minText.textContent = m.toString().padStart(2, '0');
     }
 
     async function updateWeather() {
       try {
+        // Tenta buscar diretamente
         const res = await fetch(`https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`);
-        if (!res.ok) throw new Error();
         const data = await res.json();
-        document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
-        document.getElementById('desc').textContent = data.weather[0].description;
+        
+        if(data.main) {
+            document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
+            document.getElementById('desc').textContent = data.weather[0].description;
+        } else {
+            throw new Error();
+        }
       } catch (err) {
-        document.getElementById('desc').textContent = "Clima indisponível";
+        document.getElementById('desc').textContent = "Aguardando API (até 2h)";
       }
     }
 
-    initClock();
-    setInterval(updateTime, 1000);
-    setInterval(updateWeather, 600000); // Atualiza clima a cada 10 min
-    updateTime();
+    init();
+    setInterval(update, 1000);
+    setInterval(updateWeather, 600000);
+    update();
     updateWeather();
   </script>
 </body>
