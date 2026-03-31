@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Relógio Moderno | Florianópolis</title>
+  <title>Teste de Layout - Relógio Premium</title>
   <style>
     @import url("https://googleapis.com");
 
@@ -89,8 +89,8 @@
     <div class="hour">00</div>
 
     <div class="weather">
-      <span id="temp">--°C</span>
-      <span id="desc">Sincronizando clima...</span>
+      <span id="temp">25°C</span>
+      <span id="desc">Modo de Teste (Céu Limpo)</span>
     </div>
   </main>
 
@@ -99,9 +99,6 @@
     const minutesEl = document.querySelector('.minutes');
     const minuteText = document.querySelector('.minute-focus');
     const hourText = document.querySelector('.hour');
-
-    const API_KEY = "a0d43926399b27cb538f5713317a90a6"; 
-    const CITY = "Florianopolis";
 
     function initClock() {
       for (let s = 0; s < 60; s++) {
@@ -133,34 +130,11 @@
       minuteText.textContent = m.toString().padStart(2, '0');
     }
 
-    async function updateWeather() {
-      try {
-        const url = `https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`;
-        const res = await fetch(url);
-        
-        if (!res.ok) {
-            const error = await res.json();
-            console.error("Erro API:", error.message);
-            return;
-        }
-        
-        const data = await res.json();
-        
-        // CORREÇÃO AQUI: weather[0] é necessário para acessar a descrição
-        document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
-        document.getElementById('desc').textContent = data.weather[0].description;
-        
-      } catch (err) {
-        console.error("Erro Conexão:", err);
-        document.getElementById('desc').textContent = "Clima indisponível";
-      }
-    }
-
     initClock();
     setInterval(updateTime, 1000);
-    setInterval(updateWeather, 600000); 
     updateTime();
-    updateWeather();
+    
+    console.log("Relógio carregado com sucesso!");
   </script>
 </body>
 </html>
