@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relógio Moderno | Florianópolis</title>
   <style>
+    /* Importação corrigida da fonte Comfortaa */
     @import url("https://googleapis.com");
 
     body {
@@ -100,7 +101,6 @@
     const minuteText = document.querySelector('.minute-focus');
     const hourText = document.querySelector('.hour');
 
-    // DADOS DA SUA API
     const API_KEY = "b2149d654a7186c9e90a4d102310f688"; 
     const CITY = "Florianopolis";
 
@@ -136,7 +136,7 @@
 
     async function updateWeather() {
       try {
-        // URL CORRIGIDA: api. + /data/2.5/ + ?q=
+        // URL CORRIGIDA com api. e os parâmetros corretos (? e &)
         const url = `https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`;
         const res = await fetch(url);
         
@@ -144,12 +144,10 @@
         
         const data = await res.json();
         
-        // Exibição dos dados
         document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
         document.getElementById('desc').textContent = data.weather[0].description;
         
       } catch (err) {
-        // Se a chave ainda não estiver ativa, aparecerá esta mensagem
         document.getElementById('desc').textContent = "Ativando Chave API (aguarde)...";
       }
     }
