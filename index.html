@@ -100,7 +100,7 @@
     const minuteText = document.querySelector('.minute-focus');
     const hourText = document.querySelector('.hour');
 
-    const API_KEY = "0e48c216edda0cd4a3ebdcc196570978"; 
+    const API_KEY = "b2149d654a7186c9e90a4d102310f688"; 
     const CITY = "Florianopolis";
 
     function initClock() {
@@ -135,20 +135,20 @@
 
     async function updateWeather() {
       try {
-        // URL da API corrigida
-        const url = `https://openweathermap.org{CITY}&units=metric&lang=pt_br&appid=${API_KEY}`;
+        // Chamada de API conforme o padrão do OpenWeather
+        const url = `https://openweathermap.org{CITY}&units=metric&lang=pt_br&APPID=${API_KEY}`;
         const res = await fetch(url);
         
         if (!res.ok) throw new Error();
         
         const data = await res.json();
         
-        // Acesso correto aos dados climáticos
         document.getElementById('temp').textContent = `${Math.round(data.main.temp)}°C`;
         document.getElementById('desc').textContent = data.weather[0].description;
         
       } catch (err) {
-        document.getElementById('desc').textContent = "Clima indisponível";
+        // Se a chave ainda não estiver ativa, aparecerá esta mensagem
+        document.getElementById('desc').textContent = "Ativando Chave API...";
       }
     }
 
@@ -160,6 +160,3 @@
   </script>
 </body>
 </html>
-
-
-
